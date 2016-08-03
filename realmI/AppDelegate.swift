@@ -7,6 +7,9 @@
 //
 
 import UIKit
+import RealmSwift
+
+let uiRealm = try! Realm()
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,7 +18,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        // Override point for customization after application launch.
+        
+         print(uiRealm.configuration.fileURL)
+        
+        let mainController = UINavigationController(rootViewController: ListViewController())
+        window = UIWindow(frame: UIScreen.mainScreen().bounds)
+        window?.rootViewController = mainController
+        window?.makeKeyAndVisible()
         return true
     }
 
