@@ -13,23 +13,38 @@ class ElemViewController: UIViewController {
     
     var tableView: UITableView!
     var selectedList : RListWants!
-    var openTasks : Results<FirstO>!
-    var completedTasks : Results<FirstO>!
+    var openMarket : Results<RMarket>!
+    var completedMarket : Results<RMarket>!
     var currentCreateAction: UIAlertAction!
     var isEditingMode = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.view.backgroundColor = UIColor.bgColor()
         tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.backgroundColor = UIColor.tableColor()
         tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         view.addSubview(tableView)
         
-        let editButton = UIBarButtonItem.init(title: "Edit", style: .Plain, target: self, action: #selector(ElemViewController.didClickOnEdit(_:)))
+        
+        // Edit Button
+        let button = UIButton(type: UIButtonType.Custom) as UIButton
+        button.setImage(UIImage(named: "editCollection"), forState: UIControlState.Normal)
+        button.addTarget(self, action: #selector(ElemViewController.didClickOnEdit(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        button.frame = CGRectMake(0, 0, 30, 30)
+        let editButton = UIBarButtonItem(customView: button)
         self.navigationItem.setRightBarButtonItem(editButton, animated: true)
-        let addButton = UIBarButtonItem.init(title: "Add", style: .Plain, target: self, action: #selector(ElemViewController.didClickOnNew(_:)))
+        
+        // Add button
+        let buttonAdd = UIButton(type: UIButtonType.Custom) as UIButton
+        buttonAdd.setImage(UIImage(named: "addToCollection"), forState: UIControlState.Normal)
+        buttonAdd.addTarget(self, action: #selector(ElemViewController.didClickOnNew(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        buttonAdd.frame = CGRectMake(0, 0, 30, 30)
+        let addButton = UIBarButtonItem(customView: buttonAdd)
+        self.navigationItem.leftItemsSupplementBackButton = true
+        navigationController?.navigationBar.tintColor = UIColor.tableColor()
         self.navigationItem.setLeftBarButtonItem(addButton, animated: true)
         
         tableView.snp_makeConstraints { (make) in
@@ -37,9 +52,7 @@ class ElemViewController: UIViewController {
             make.width.equalTo(view)
             make.height.equalTo(view)
         }
-        
         readTasksAndUpateUI()
-     
     }
 
     override func didReceiveMemoryWarning() {
@@ -58,63 +71,64 @@ class ElemViewController: UIViewController {
     
     func readTasksAndUpateUI(){
         
-      //  completedTasks = self.selectedList.tasks.filter("isCompleted = true")
-      //  openTasks = self.selectedList.tasks.filter("isCompleted = false")
+        completedMarket = self.selectedList.tasks.filter("isCompleted = true")
+        openMarket = self.selectedList.tasks.filter("isCompleted = false")
         tableView.reloadData()
     }
 
-    func displayAlertToAddTask(updatedTask:FirstO!){
-        
-        var title = "New Task"
-        var doneTitle = "Create"
-        if updatedTask != nil {
-            title = "Update Task"
-            doneTitle = "Update"
-        }
-        
-        let alertController = UIAlertController(title: title, message: "Write the name of your task.", preferredStyle: UIAlertControllerStyle.Alert)
-        alertController.view.setNeedsLayout()
-        let createAction = UIAlertAction(title: doneTitle, style: UIAlertActionStyle.Default) { (action) -> Void in
-            
-            let taskName = alertController.textFields?.first?.text
-            
-            if updatedTask != nil{
-                // update mode
-                
-                   try!  uiRealm.write({ () -> Void in
-                        updatedTask.name = taskName!
-                        self.readTasksAndUpateUI() })
-            } else {
-                
-                let newTask = FirstO()
-                newTask.name = taskName!
-               
-                   try! uiRealm.write({ () -> Void in
-                        //self.selectedList.tasks.append(newTask)
-                        self.readTasksAndUpateUI() })
-
-           }
-            print(taskName)
-        }
-        
-        alertController.addAction(createAction)
-        createAction.enabled = false
-        self.currentCreateAction = createAction
-        
-        alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
-        
-        alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
-            textField.placeholder = "Name"
-            textField.addTarget(self, action: #selector(ElemViewController.taskNameFieldDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
-            if updatedTask != nil{
-                textField.text = updatedTask.name
+    func displayAlertToAddTask(updatedMarket:RMarket!){
+          //if !(self.navigationController?.visibleViewController?.isKindOfClass(UIAlertController.classForCoder()))! {
+            var title = "New Market"
+            var doneTitle = "Create"
+            if updatedMarket != nil {
+                title = "Update Market"
+                doneTitle = "Update"
             }
-        }
-        
-        self.presentViewController(alertController, animated: true, completion: nil)
+            
+            let alertControllerEl = UIAlertController(title: title, message: "Write the name of your Market.", preferredStyle: UIAlertControllerStyle.Alert)
+            alertControllerEl.view.setNeedsLayout()
+            let createAction = UIAlertAction(title: doneTitle, style: UIAlertActionStyle.Default) { (action) -> Void in
+                
+                let marketName = alertControllerEl.textFields?.first?.text
+                
+                if updatedMarket != nil{
+                    // update mode
+                    
+                    try!  uiRealm.write({ () -> Void in
+                        updatedMarket.name = marketName!
+                        self.readTasksAndUpateUI() })
+                } else {
+                    
+                    let newMarket = RMarket()
+                    newMarket.name = marketName!
+                    
+                    try! uiRealm.write({ () -> Void in
+                        self.selectedList.tasks.append(newMarket)
+                        self.readTasksAndUpateUI() })
+                    
+                }
+            }
+            
+            alertControllerEl.addAction(createAction)
+             createAction.enabled = false
+            self.currentCreateAction = createAction
+            
+            alertControllerEl.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
+            
+            alertControllerEl.addTextFieldWithConfigurationHandler { (textField) -> Void in
+                textField.placeholder = "Name"
+                textField.addTarget(self, action: #selector(ElemViewController.taskNameFieldDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+                if updatedMarket != nil{
+                    textField.text = updatedMarket.name
+                }
+            }
+            
+            self.presentViewController(alertControllerEl, animated: true, completion: nil)
+        //}
     }
     
     func taskNameFieldDidChange(textField:UITextField){
+        print(textField.text?.characters.count > 0)
         self.currentCreateAction.enabled = textField.text?.characters.count > 0
     }
 }
@@ -129,26 +143,26 @@ extension ElemViewController: UITableViewDataSource {
     }
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
         if section == 0 {
-            return openTasks.count
+            return openMarket.count
         }
-        return completedTasks.count
+        return completedMarket.count
     }
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         
         if section == 0 {
-            return "OPEN"
+            return "ADDED"
         }
         return "SELECTED"
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell{
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell")
-        var task: FirstO!
+        var task: RMarket!
         if indexPath.section == 0{
-            task = openTasks[indexPath.row]
+            task = openMarket[indexPath.row]
         }
         else{
-            task = completedTasks[indexPath.row]
+            task = completedMarket[indexPath.row]
         }
         
         cell?.textLabel?.text = task.name
@@ -159,12 +173,12 @@ extension ElemViewController: UITableViewDataSource {
             
             //Deletion will go here
             
-            var taskToBeDeleted: FirstO!
+            var taskToBeDeleted: RMarket!
             if indexPath.section == 0{
-                taskToBeDeleted = self.openTasks[indexPath.row]
+                taskToBeDeleted = self.openMarket[indexPath.row]
             }
             else{
-                taskToBeDeleted = self.completedTasks[indexPath.row]
+                taskToBeDeleted = self.completedMarket[indexPath.row]
             }
              try! uiRealm.write({ () -> Void in
                 uiRealm.delete(taskToBeDeleted)
@@ -174,12 +188,12 @@ extension ElemViewController: UITableViewDataSource {
         let editAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: "Edit") { (editAction, indexPath) -> Void in
             
             // Editing will go here
-            var taskToBeUpdated: FirstO!
+            var taskToBeUpdated: RMarket!
             if indexPath.section == 0 {
-                taskToBeUpdated = self.openTasks[indexPath.row]
+                taskToBeUpdated = self.openMarket[indexPath.row]
             }
             else {
-                taskToBeUpdated = self.completedTasks[indexPath.row]
+                taskToBeUpdated = self.completedMarket[indexPath.row]
             }
             
             self.displayAlertToAddTask(taskToBeUpdated)
@@ -188,12 +202,12 @@ extension ElemViewController: UITableViewDataSource {
         
         let doneAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: "Select") { (doneAction, indexPath) -> Void in
             // Editing will go here
-            var taskToBeUpdated: FirstO!
+            var taskToBeUpdated: RMarket!
             if indexPath.section == 0 {
-                taskToBeUpdated = self.openTasks[indexPath.row]
+                taskToBeUpdated = self.openMarket[indexPath.row]
             }
             else{
-                taskToBeUpdated = self.completedTasks[indexPath.row]
+                taskToBeUpdated = self.completedMarket[indexPath.row]
             }
             try! uiRealm.write({ () -> Void in
                 taskToBeUpdated.isCompleted = true
@@ -203,6 +217,4 @@ extension ElemViewController: UITableViewDataSource {
         
         return [deleteAction, editAction, doneAction]
     }
-    
-
 }

@@ -8,7 +8,7 @@
 
 import RealmSwift
 
-class FirstO: Object {
+class RMarket: Object {
     
     dynamic var name = ""
     dynamic var createdAt = NSDate()

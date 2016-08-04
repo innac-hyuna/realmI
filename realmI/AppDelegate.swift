@@ -23,6 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let mainController = UINavigationController(rootViewController: ListViewController())
         window = UIWindow(frame: UIScreen.mainScreen().bounds)
+        window?.backgroundColor = UIColor.bgColor()
         window?.rootViewController = mainController
         window?.makeKeyAndVisible()
         return true

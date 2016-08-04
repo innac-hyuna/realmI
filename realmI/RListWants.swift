@@ -37,7 +37,7 @@ class RListWants: Object, Mappable {
     dynamic var year = 0
     dynamic var date_added = NSDate()
     
-    let tasks = List<FirstO>()
+    let tasks = List<RMarket>()
     
     
     required convenience init?(_ map: Map) {
@@ -82,9 +82,8 @@ class RListWants: Object, Mappable {
         artists_role <- map["basic_information.artists.0.role"]
         artists_resource_url <- map["basic_information.artists.0.resource_url"]
         artists_id <- map["basic_information.artists.0.id"]
-        year <- map["basic_information"]
-        date_added  <- map["date_added"]
-        
+        year <- map["basic_information.year"]
+        date_added  <- map["date_added"]        
     }
     
 }

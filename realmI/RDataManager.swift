@@ -26,9 +26,8 @@ class RDataManager {
                         print(uiRealm.configuration.fileURL)
                     for want in wants {
                         try uiRealm.write {
-                            uiRealm.add(want,update: true)
+                            uiRealm.add(want,update: true)    }
                         }
-                   }
                     } catch let error as NSError {
                         print("Failure NSError")
                     }
@@ -38,11 +37,8 @@ class RDataManager {
                 
                 dispatch_async(dispatch_get_main_queue()) {
                     callback?(true)
-
            }
-        }
-        
-      
+     }
 }
     
     func delData(urlStr: String) {

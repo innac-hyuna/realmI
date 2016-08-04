@@ -19,26 +19,36 @@ class ListViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-   
-        
+        self.view.backgroundColor = UIColor.bgColor()
         tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "listCell")
+        tableView.backgroundColor = UIColor.tableColor()
+        tableView.registerClass(WantlistTableViewCell.self, forCellReuseIdentifier: "listCell")
         view.addSubview(tableView)
         
         let segmSort = UISegmentedControl(items: ["A-Z","Date"])
         segmSort.selectedSegmentIndex = 1
         segmSort.addTarget(self, action: #selector(ListViewController.didSelectSortCriteria(_:)), forControlEvents: .TouchUpInside)
         segmSort.addTarget(self, action: #selector(ListViewController.didSelectSortCriteria(_:)), forControlEvents: .ValueChanged)
+        segmSort.tintColor = UIColor.barItemColor()
         view.addSubview(segmSort)
-
         
-        let editButton = UIBarButtonItem.init(title: "Edit", style: .Plain, target: self, action: #selector(ListViewController.didClickOnEditButton(_:)))
+       // Edit Button
+        let button = UIButton(type: UIButtonType.Custom) as UIButton
+        button.setImage(UIImage(named: "editCollection"), forState: UIControlState.Normal)
+        button.addTarget(self, action: #selector(ListViewController.didClickOnEditButton(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        button.frame=CGRectMake(0, 0, 30, 30)
+        let editButton = UIBarButtonItem(customView: button)
         self.navigationItem.setRightBarButtonItem(editButton, animated: true)
-        let addButton = UIBarButtonItem.init(title: "Add", style: .Plain, target: self, action: #selector(ListViewController.didClickOnAddButton(_:)))
-        self.navigationItem.setLeftBarButtonItem(addButton, animated: true)
         
+        // Add button
+        let buttonAdd = UIButton(type: UIButtonType.Custom) as UIButton
+        buttonAdd.setImage(UIImage(named: "addToCollection"), forState: UIControlState.Normal)
+        buttonAdd.addTarget(self, action: #selector(ListViewController.didClickOnAddButton(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        buttonAdd.frame=CGRectMake(0, 0, 30, 30)
+        let addButton = UIBarButtonItem(customView: buttonAdd)
+        self.navigationItem.setLeftBarButtonItem(addButton, animated: true)
         
         segmSort.snp_makeConstraints { (make) in
             make.top.equalTo(snp_topLayoutGuideBottom)
@@ -47,20 +57,24 @@ class ListViewController: UIViewController {
         }
         
         tableView.snp_makeConstraints { (make) in
-            make.top.equalTo(segmSort.snp_bottom)
+            make.top.equalTo(segmSort.snp_bottom).offset(10)
             make.width.equalTo(view)
             make.height.equalTo(view)
         }
-        
-        RDataManager.sharedManager.getData("https://api.discogs.com/users/innablack/wants?per_page=50&page=1") { [unowned self] (eprocess) in
-            if eprocess {
-              self.readTasksAndUpdateUI()  
-            }
-            
-        }
-
+       
+        loadData(0)
     }
+    
+    func loadData(i: Int) -> Bool {
 
+        RDataManager.sharedManager.getData("https://api.discogs.com/users/innablack/wants?per_page=50&page=\(i)") { [unowned self] (eprocess) in
+            print("https://api.discogs.com/users/innablack/wants?per_page=50&page=\(i)")
+            if eprocess {
+                self.readTasksAndUpdateUI()
+            }
+        }
+      return true
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -73,13 +87,12 @@ class ListViewController: UIViewController {
     func didSelectSortCriteria(sender: UISegmentedControl) {
         
         if sender.selectedSegmentIndex == 0 {
-            
             // A-Z
             self.lists = self.lists.sorted("title")
         }
         else{
             // date
-            self.lists = self.lists.sorted("date_added", ascending:false)
+            self.lists = self.lists.sorted("year", ascending: false)
         }
         self.tableView.reloadData()
     }
@@ -94,56 +107,82 @@ class ListViewController: UIViewController {
         displayAlertToAddTaskList(nil)
     }
     
-    
     func displayAlertToAddTaskList(updatedList: RListWants!){
-        
-        var title = "New List"
-        var doneTitle = "Create"
-        if updatedList != nil{
-            title = "Update  List"
-            doneTitle = "Update"
-        }
-        
-        let alertController = UIAlertController(title: title, message: "Write the name of your list.", preferredStyle: UIAlertControllerStyle.Alert)
-        alertController.view.setNeedsLayout()
-        let createAction = UIAlertAction(title: doneTitle, style: UIAlertActionStyle.Default) { alert -> Void in
-            
-            let listName = alertController.textFields?.first?.text
-            
-            if updatedList != nil {
-                // update mode
-                try! uiRealm.write({ () -> Void in
-                    updatedList.title = listName!
-                    self.readTasksAndUpdateUI()  })
-            } else {
-                let updatedList = RListWants()
-                updatedList.title = listName!
-                updatedList.id = updatedList.IncrementaID()
-                updatedList.date_added = NSDate()
-                
-                try! uiRealm.write({ () -> Void in                    
-                    uiRealm.add(updatedList)
-                    self.readTasksAndUpdateUI()   })
-            }
-            
-            print(listName)
-        }
-        
-        alertController.addAction(createAction)
-        createAction.enabled = false
-        self.currentCreateAction = createAction
-        
-        alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
-        
-        alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
-            textField.placeholder = "List Name"
-            textField.addTarget(self, action: #selector(self.listNameFieldDidChange), forControlEvents: UIControlEvents.EditingChanged)
+        // if !(self.navigationController?.visibleViewController?.isKindOfClass(UIAlertController.classForCoder()))! {
+            var title = "New List"
+            var doneTitle = "Create"
             if updatedList != nil{
-                textField.text = updatedList.title
+                title = "Update  List"
+                doneTitle = "Update"
             }
-        }
+            
+            let alertController = UIAlertController(title: title, message: "Write the name of your list.", preferredStyle: UIAlertControllerStyle.Alert)
+            alertController.view.setNeedsLayout()
+            
+            
+            let createAction = UIAlertAction(title: doneTitle, style: UIAlertActionStyle.Default) { alert -> Void in
+                
+                let name = alertController.textFields?[0].text
+                let year = alertController.textFields?[1].text
+                let rating = alertController.textFields?[2].text
+                self.addToRealm(updatedList, listName: name, year: year, rating: rating!)
+                
+            }
+            
+            alertController.addAction(createAction)
+            createAction.enabled = false
+            self.currentCreateAction = createAction
+            
+            alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
+            
+            alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
+                textField.placeholder = "Title"
+                textField.addTarget(self, action: #selector(self.listNameFieldDidChange), forControlEvents: UIControlEvents.EditingChanged)
+                if updatedList != nil{
+                    textField.text = updatedList.title
+                }
+            }
+            
+            alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
+                textField.placeholder = "Year"
+                textField.addTarget(self, action: #selector(self.listNameFieldDidChange), forControlEvents: UIControlEvents.EditingChanged)
+                if updatedList != nil{
+                    textField.text = String(updatedList.year)
+                }
+            }
+            alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
+                textField.placeholder = "Rating"
+                textField.addTarget(self, action: #selector(self.listNameFieldDidChange), forControlEvents: UIControlEvents.EditingChanged)
+                if updatedList != nil{
+                    textField.text = String(updatedList.rating)
+                }
+            }
+            presentViewController(alertController, animated: true, completion: nil) //}
+    }
+    
+    func addToRealm (updatedList: RListWants!, listName: String!, year: String!, rating: String!) {
         
-        self.presentViewController(alertController, animated: true, completion: nil)
+        if updatedList != nil {
+            // update mode
+            try! uiRealm.write({ () -> Void in
+                updatedList.title = listName!
+                updatedList.year = Int(year)!
+                updatedList.rating = Int(rating)!
+                self.readTasksAndUpdateUI()  })
+        } else {
+            let updatedList = RListWants()
+            updatedList.title = listName!
+            updatedList.id = updatedList.IncrementaID()
+            updatedList.year = Int(year) ?? 0
+            updatedList.rating = Int(rating) ?? 0
+            updatedList.date_added = NSDate()
+            
+            try! uiRealm.write({ () -> Void in
+                uiRealm.add(updatedList)
+                self.readTasksAndUpdateUI()
+            })
+        }
+
     }
     
     func listNameFieldDidChange(textField:UITextField){
@@ -168,13 +207,16 @@ extension ListViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell{
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("listCell")
+        let cell = tableView.dequeueReusableCellWithIdentifier("listCell") as! WantlistTableViewCell
         
         let list = lists[indexPath.row]
         
-        cell?.textLabel?.text = list.title
-        cell?.detailTextLabel?.text = "\(list.tasks.count) Tasks"
-        return cell!
+        cell.titleLabel.text = list.title
+        cell.year.text = String(list.year)
+        cell.textFormat.text = list.formats_descriptions
+        cell.floatRatingView.rating = Float(list.rating)
+             
+        return cell
     }
     
     func readTasksAndUpdateUI(){
@@ -211,6 +253,7 @@ extension ListViewController: UITableViewDataSource {
         let elemenContr = ElemViewController()
         
         elemenContr.selectedList =  self.lists[indexPath.row]
+        
         navigationController?.pushViewController(elemenContr, animated: true)
         
     }
