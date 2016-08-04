@@ -27,7 +27,7 @@ class ListViewController: UIViewController {
         tableView.registerClass(WantlistTableViewCell.self, forCellReuseIdentifier: "listCell")
         view.addSubview(tableView)
         
-        let segmSort = UISegmentedControl(items: ["A-Z","Date"])
+        let segmSort = UISegmentedControl(items: ["A-Z","Year","Rating"])
         segmSort.selectedSegmentIndex = 1
         segmSort.addTarget(self, action: #selector(ListViewController.didSelectSortCriteria(_:)), forControlEvents: .TouchUpInside)
         segmSort.addTarget(self, action: #selector(ListViewController.didSelectSortCriteria(_:)), forControlEvents: .ValueChanged)
@@ -59,7 +59,7 @@ class ListViewController: UIViewController {
         tableView.snp_makeConstraints { (make) in
             make.top.equalTo(segmSort.snp_bottom).offset(10)
             make.width.equalTo(view)
-            make.height.equalTo(view)
+            make.bottom.equalTo(view).offset(0)
         }
        
         loadData(0)
@@ -86,14 +86,17 @@ class ListViewController: UIViewController {
     
     func didSelectSortCriteria(sender: UISegmentedControl) {
         
-        if sender.selectedSegmentIndex == 0 {
-            // A-Z
+        switch sender.selectedSegmentIndex {
+        case 0:
             self.lists = self.lists.sorted("title")
+        case 1:
+            self.lists = self.lists.sorted("year")
+        case 2:
+            self.lists = self.lists.sorted("rating")
+        default:
+            break
         }
-        else{
-            // date
-            self.lists = self.lists.sorted("year", ascending: false)
-        }
+       
         self.tableView.reloadData()
     }
     

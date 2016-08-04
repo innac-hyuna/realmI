@@ -104,13 +104,12 @@ class ElemViewController: UIViewController {
                     
                     try! uiRealm.write({ () -> Void in
                         self.selectedList.tasks.append(newMarket)
-                        self.readTasksAndUpateUI() })
-                    
+                        self.readTasksAndUpateUI() })                    
                 }
             }
             
             alertControllerEl.addAction(createAction)
-             createAction.enabled = false
+            createAction.enabled = false
             self.currentCreateAction = createAction
             
             alertControllerEl.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
