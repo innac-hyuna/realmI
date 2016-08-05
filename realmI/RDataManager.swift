@@ -22,7 +22,6 @@ class RDataManager {
                 switch response.result {
                 case .Success(let wants):
                     do {
-                        print(wants)
                         print(uiRealm.configuration.fileURL)
                     for want in wants {
                         try uiRealm.write {
@@ -46,7 +45,7 @@ class RDataManager {
             .response { (request, response, data, error) in
                 print(request)
                 print(response)
-        }
+        }       
     }
     
     func updateData(urlStr: String, parameters: NSDictionary) {

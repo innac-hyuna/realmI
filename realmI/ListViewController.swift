@@ -128,6 +128,7 @@ class ListViewController: UIViewController {
                 let name = alertController.textFields?[0].text
                 let year = alertController.textFields?[1].text
                 let rating = alertController.textFields?[2].text
+               // print(updatedList)
                 self.addToRealm(updatedList, listName: name, year: year, rating: rating!)
                 
             }
@@ -169,9 +170,15 @@ class ListViewController: UIViewController {
             // update mode
             try! uiRealm.write({ () -> Void in
                 updatedList.title = listName!
-                updatedList.year = Int(year)!
-                updatedList.rating = Int(rating)!
-                self.readTasksAndUpdateUI()  })
+                updatedList.year = Int(year) ?? 0
+                updatedList.rating = Int(rating) ?? 0             
+                let param = [
+                    "username": "innablack",
+                    "rating" : rating,
+                    "release_id": updatedList.id]
+               RDataManager.sharedManager.updateData("https://api.discogs.com/users/innablack/wants/\(updatedList.id)?token=JTmFFQvqhkXoEMqUYvwgFaUafYYzrpXfSKJQlocc", parameters: param)
+                self.readTasksAndUpdateUI()
+            })
         } else {
             let updatedList = RListWants()
             updatedList.title = listName!
@@ -181,8 +188,11 @@ class ListViewController: UIViewController {
             updatedList.date_added = NSDate()
             
             try! uiRealm.write({ () -> Void in
-                uiRealm.add(updatedList)
                 self.readTasksAndUpdateUI()
+                let param = [ "username" : "innablack",
+                    "release_id" : updatedList.IncrementaID()]
+                RDataManager.sharedManager.updateDataPut("https://api.discogs.com/users/innablack/wants/\(updatedList.IncrementaID())?token=JTmFFQvqhkXoEMqUYvwgFaUafYYzrpXfSKJQlocc", parameters: param)
+                uiRealm.add(updatedList)
             })
         }
 
@@ -232,14 +242,13 @@ extension ListViewController: UITableViewDataSource {
     func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
         let deleteAction = UITableViewRowAction(style: UITableViewRowActionStyle.Destructive, title: "Delete") { (deleteAction, indexPath) -> Void in
             
-            //Deletion will go here
-            
             let listToBeDeleted = self.lists[indexPath.row]
              try! uiRealm.write({ () -> Void in
+                 RDataManager.sharedManager.delData("https://api.discogs.com/users/innablack/wants/\(self.lists[indexPath.row].id)?token=JTmFFQvqhkXoEMqUYvwgFaUafYYzrpXfSKJQlocc")
                  uiRealm.delete(listToBeDeleted)
-                 self.readTasksAndUpdateUI() })
-          
+                 self.readTasksAndUpdateUI()})
         }
+        
         let editAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: "Edit") { (editAction, indexPath) -> Void in
             
             // Editing will go here
@@ -247,6 +256,7 @@ extension ListViewController: UITableViewDataSource {
             self.displayAlertToAddTaskList(listToBeUpdated)
             
         }
+        
         return [deleteAction, editAction]
     }
     
