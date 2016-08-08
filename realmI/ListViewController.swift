@@ -10,6 +10,13 @@ import UIKit
 import RealmSwift
 import SnapKit
 
+enum status: Int {
+    case non = 0
+    case added = 1
+    case deleted = 2
+    case updated = 3
+}
+
 class ListViewController: UIViewController {
     
        var tableView: UITableView!
@@ -33,6 +40,12 @@ class ListViewController: UIViewController {
         segmSort.addTarget(self, action: #selector(ListViewController.didSelectSortCriteria(_:)), forControlEvents: .ValueChanged)
         segmSort.tintColor = UIColor.barItemColor()
         view.addSubview(segmSort)
+        //
+        let buttonSyn = UIButton(type: UIButtonType.Custom) as UIButton
+        buttonSyn.setImage(UIImage(named: "Synchronize"), forState: UIControlState.Normal)
+        buttonSyn.addTarget(self, action: #selector(ListViewController.synchronization(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        buttonSyn.frame=CGRectMake(0, 0, 30, 30)
+        let synButton = UIBarButtonItem(customView: buttonSyn)
         
        // Edit Button
         let button = UIButton(type: UIButtonType.Custom) as UIButton
@@ -40,7 +53,7 @@ class ListViewController: UIViewController {
         button.addTarget(self, action: #selector(ListViewController.didClickOnEditButton(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         button.frame=CGRectMake(0, 0, 30, 30)
         let editButton = UIBarButtonItem(customView: button)
-        self.navigationItem.setRightBarButtonItem(editButton, animated: true)
+        self.navigationItem.setRightBarButtonItems([editButton, synButton], animated: true)
         
         // Add button
         let buttonAdd = UIButton(type: UIButtonType.Custom) as UIButton
@@ -48,6 +61,7 @@ class ListViewController: UIViewController {
         buttonAdd.addTarget(self, action: #selector(ListViewController.didClickOnAddButton(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         buttonAdd.frame=CGRectMake(0, 0, 30, 30)
         let addButton = UIBarButtonItem(customView: buttonAdd)
+        
         self.navigationItem.setLeftBarButtonItem(addButton, animated: true)
         
         segmSort.snp_makeConstraints { (make) in
@@ -111,49 +125,25 @@ class ListViewController: UIViewController {
     }
     
     func displayAlertToAddTaskList(updatedList: RListWants!){
-        // if !(self.navigationController?.visibleViewController?.isKindOfClass(UIAlertController.classForCoder()))! {
+        
             var title = "New List"
             var doneTitle = "Create"
             if updatedList != nil{
                 title = "Update  List"
                 doneTitle = "Update"
             }
-            
+        
             let alertController = UIAlertController(title: title, message: "Write the name of your list.", preferredStyle: UIAlertControllerStyle.Alert)
-            alertController.view.setNeedsLayout()
-            
-            
-            let createAction = UIAlertAction(title: doneTitle, style: UIAlertActionStyle.Default) { alert -> Void in
-                
-                let name = alertController.textFields?[0].text
-                let year = alertController.textFields?[1].text
-                let rating = alertController.textFields?[2].text
-               // print(updatedList)
-                self.addToRealm(updatedList, listName: name, year: year, rating: rating!)
-                
-            }
-            
-            alertController.addAction(createAction)
-            createAction.enabled = false
-            self.currentCreateAction = createAction
-            
-            alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
-            
+      
             alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
                 textField.placeholder = "Title"
+                textField.enabled = false
                 textField.addTarget(self, action: #selector(self.listNameFieldDidChange), forControlEvents: UIControlEvents.EditingChanged)
                 if updatedList != nil{
                     textField.text = updatedList.title
                 }
             }
-            
-            alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
-                textField.placeholder = "Year"
-                textField.addTarget(self, action: #selector(self.listNameFieldDidChange), forControlEvents: UIControlEvents.EditingChanged)
-                if updatedList != nil{
-                    textField.text = String(updatedList.year)
-                }
-            }
+        
             alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
                 textField.placeholder = "Rating"
                 textField.addTarget(self, action: #selector(self.listNameFieldDidChange), forControlEvents: UIControlEvents.EditingChanged)
@@ -161,45 +151,57 @@ class ListViewController: UIViewController {
                     textField.text = String(updatedList.rating)
                 }
             }
-            presentViewController(alertController, animated: true, completion: nil) //}
+        
+        //CREATE
+       let createAction = UIAlertAction(title: doneTitle, style: UIAlertActionStyle.Default) { alert -> Void in
+            
+            let name = alertController.textFields?[0].text
+            let rating = alertController.textFields?[1].text
+            self.addToRealm(updatedList, listName: name, rating: rating)
+            
+        }
+           alertController.addAction(createAction)
+           createAction.enabled = false
+           self.currentCreateAction = createAction
+        
+        //CANCEL
+        alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
+        
+          // alertController.view.setNeedsLayout()
+           presentViewController(alertController, animated: true, completion: nil)
     }
     
-    func addToRealm (updatedList: RListWants!, listName: String!, year: String!, rating: String!) {
+    func addToRealm (updatedList: RListWants!, listName: String!, rating: String!) {
         
         if updatedList != nil {
             // update mode
             try! uiRealm.write({ () -> Void in
                 updatedList.title = listName!
-                updatedList.year = Int(year) ?? 0
-                updatedList.rating = Int(rating) ?? 0             
-                let param = [
-                    "username": "innablack",
-                    "rating" : rating,
-                    "release_id": updatedList.id]
-               RDataManager.sharedManager.updateData("https://api.discogs.com/users/innablack/wants/\(updatedList.id)?token=JTmFFQvqhkXoEMqUYvwgFaUafYYzrpXfSKJQlocc", parameters: param)
+                updatedList.rating = Int(rating) ?? 0
+                updatedList.status = status.updated.rawValue
                 self.readTasksAndUpdateUI()
             })
         } else {
+            // add mode
             let updatedList = RListWants()
             updatedList.title = listName!
             updatedList.id = updatedList.IncrementaID()
-            updatedList.year = Int(year) ?? 0
             updatedList.rating = Int(rating) ?? 0
             updatedList.date_added = NSDate()
-            
-            try! uiRealm.write({ () -> Void in
-                self.readTasksAndUpdateUI()
-                let param = [ "username" : "innablack",
-                    "release_id" : updatedList.IncrementaID()]
-                RDataManager.sharedManager.updateDataPut("https://api.discogs.com/users/innablack/wants/\(updatedList.IncrementaID())?token=JTmFFQvqhkXoEMqUYvwgFaUafYYzrpXfSKJQlocc", parameters: param)
+            updatedList.status = status.added.rawValue
+            try! uiRealm.write({ () -> Void in              
                 uiRealm.add(updatedList)
+                self.readTasksAndUpdateUI()
             })
         }
-
     }
     
     func listNameFieldDidChange(textField:UITextField){
         self.currentCreateAction.enabled = textField.text?.characters.count > 0
+    }
+    
+    func synchronization (sender: UIButton) {
+        RDataManager.sharedManager.synRealtoDiscogs()
     }
 
 }
@@ -220,21 +222,18 @@ extension ListViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell{
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("listCell") as! WantlistTableViewCell
-        
         let list = lists[indexPath.row]
-        
+        let cell = tableView.dequeueReusableCellWithIdentifier("listCell") as! WantlistTableViewCell
         cell.titleLabel.text = list.title
         cell.year.text = String(list.year)
         cell.textFormat.text = list.formats_descriptions
         cell.floatRatingView.rating = Float(list.rating)
-             
         return cell
     }
     
     func readTasksAndUpdateUI(){
         
-        lists = uiRealm.objects(RListWants)
+        lists = uiRealm.objects(RListWants).filter("status != %@", status.deleted.rawValue)
         self.tableView.setEditing(false, animated: true)
         self.tableView.reloadData()
     }
@@ -244,9 +243,8 @@ extension ListViewController: UITableViewDataSource {
             
             let listToBeDeleted = self.lists[indexPath.row]
              try! uiRealm.write({ () -> Void in
-                 RDataManager.sharedManager.delData("https://api.discogs.com/users/innablack/wants/\(self.lists[indexPath.row].id)?token=JTmFFQvqhkXoEMqUYvwgFaUafYYzrpXfSKJQlocc")
-                 uiRealm.delete(listToBeDeleted)
-                 self.readTasksAndUpdateUI()})
+                  listToBeDeleted.status = status.deleted.rawValue
+                         self.readTasksAndUpdateUI()})
         }
         
         let editAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: "Edit") { (editAction, indexPath) -> Void in

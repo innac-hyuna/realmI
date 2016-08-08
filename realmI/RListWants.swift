@@ -36,6 +36,7 @@ class RListWants: Object, Mappable {
     dynamic var artists_id = 0
     dynamic var year = 0
     dynamic var date_added = NSDate()
+    dynamic var status = 0
     
     let tasks = List<RMarket>()
     
