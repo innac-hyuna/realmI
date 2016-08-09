@@ -28,7 +28,6 @@ class ElemViewController: UIViewController {
         tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         view.addSubview(tableView)
         
-        
         // Edit Button
         let button = UIButton(type: UIButtonType.Custom) as UIButton
         button.setImage(UIImage(named: "editCollection"), forState: UIControlState.Normal)
@@ -122,14 +121,14 @@ class ElemViewController: UIViewController {
                 }
             }
             
-            self.presentViewController(alertControllerEl, animated: true, completion: nil)
-        //}
+            self.presentViewController(alertControllerEl, animated: true, completion: nil)        
     }
     
     func taskNameFieldDidChange(textField:UITextField){
         print(textField.text?.characters.count > 0)
         self.currentCreateAction.enabled = textField.text?.characters.count > 0
     }
+
 }
 
 extension ElemViewController: UITableViewDelegate {
@@ -173,7 +172,7 @@ extension ElemViewController: UITableViewDataSource {
             //Deletion will go here
             
             var taskToBeDeleted: RMarket!
-            if indexPath.section == 0{
+            if indexPath.section == 0 {
                 taskToBeDeleted = self.openMarket[indexPath.row]
             }
             else{

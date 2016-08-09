@@ -38,7 +38,7 @@ class RListWants: Object, Mappable {
     dynamic var date_added = NSDate()
     dynamic var status = 0
     
-    let tasks = List<RMarket>()
+   // let tasks = List<RMarket>()
     
     
     required convenience init?(_ map: Map) {
@@ -60,6 +60,12 @@ class RListWants: Object, Mappable {
             return 1
         }
     }
+    func isPrimaryKey(id: Int) -> Bool {
+        let realm = try! Realm()
+        if Array(realm.objects(RListWants).filter("id = \(id)")).count > 0 {
+            return false }
+            return true
+        }
     func mapping(map: Map) {
         
         id <- map["id"]

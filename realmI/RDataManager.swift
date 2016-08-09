@@ -10,11 +10,37 @@ import ObjectMapper
 import RealmSwift
 import Alamofire
 import AlamofireObjectMapper
+import SwiftyJSON
 
 
 class RDataManager {
     
     static let sharedManager = RDataManager()
+    
+   /* func getName(text: String, callback: ([SearchName] -> ())?) {
+     
+       let urlStr = "https://api.discogs.com/database/search?q=\(text)&token=JTmFFQvqhkXoEMqUYvwgFaUafYYzrpXfSKJQlocc"
+        Alamofire.request(.GET, urlStr)
+               .responseJSON { response in
+                var iData = [SearchName]()
+               let json = JSON(response.result.value!)
+               let resultJ = json["results"].arrayValue
+                
+               for el in resultJ {
+                    let iElem = SearchName()
+                if let iid = el["id"].int {
+                     iElem.id = iid }
+                if let iname = el["title"].string {
+                     iElem.name = iname }
+                 iData.append(iElem)
+                 
+                }
+            
+        dispatch_async(dispatch_get_main_queue()) {
+            callback?(iData)
+        }
+        }
+    }*/
    
     func getData(urlStr: String, callback:((Bool)->())?) {
         

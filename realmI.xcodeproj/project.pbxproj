@@ -17,10 +17,8 @@
 		DA22355F1D4B832B00ABA979 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA22355D1D4B832B00ABA979 /* LaunchScreen.storyboard */; };
 		DA22356A1D4B832B00ABA979 /* realmITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2235691D4B832B00ABA979 /* realmITests.swift */; };
 		DA2235751D4B832B00ABA979 /* realmIUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2235741D4B832B00ABA979 /* realmIUITests.swift */; };
-		DA2235831D4B834800ABA979 /* RMarket.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2235821D4B834800ABA979 /* RMarket.swift */; };
 		DA2235851D4B852E00ABA979 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = DA2235841D4B852E00ABA979 /* Podfile */; };
 		DA76E1661D4F47F10060D181 /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76E1651D4F47F10060D181 /* ListViewController.swift */; };
-		DA76E1681D4F48510060D181 /* ElemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76E1671D4F48510060D181 /* ElemViewController.swift */; };
 		DAE5888D1D50F38F00D2677B /* RDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE5888B1D50F38E00D2677B /* RDataManager.swift */; };
 		DAE5888E1D50F38F00D2677B /* RListWants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE5888C1D50F38F00D2677B /* RListWants.swift */; };
 		E3493C8752511D27797F550B /* Pods_realmI_realmIUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61FABF75C596B6B7840238F5 /* Pods_realmI_realmIUITests.framework */; };
@@ -65,10 +63,8 @@
 		DA2235701D4B832B00ABA979 /* realmIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = realmIUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA2235741D4B832B00ABA979 /* realmIUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = realmIUITests.swift; sourceTree = "<group>"; };
 		DA2235761D4B832B00ABA979 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DA2235821D4B834800ABA979 /* RMarket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMarket.swift; sourceTree = "<group>"; };
 		DA2235841D4B852E00ABA979 /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		DA76E1651D4F47F10060D181 /* ListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
-		DA76E1671D4F48510060D181 /* ElemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElemViewController.swift; sourceTree = "<group>"; };
 		DAE5888B1D50F38E00D2677B /* RDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RDataManager.swift; sourceTree = "<group>"; };
 		DAE5888C1D50F38F00D2677B /* RListWants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RListWants.swift; sourceTree = "<group>"; };
 		E09B0E2FDC115C7A564C1DC2 /* Pods-realmI-realmITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-realmI-realmITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-realmI-realmITests/Pods-realmI-realmITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -130,7 +126,6 @@
 			isa = PBXGroup;
 			children = (
 				DA76E1651D4F47F10060D181 /* ListViewController.swift */,
-				DA76E1671D4F48510060D181 /* ElemViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -205,7 +200,6 @@
 			children = (
 				DAE5888B1D50F38E00D2677B /* RDataManager.swift */,
 				DAE5888C1D50F38F00D2677B /* RListWants.swift */,
-				DA2235821D4B834800ABA979 /* RMarket.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -489,10 +483,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA1908111D5255E0007D6480 /* Design.swift in Sources */,
-				DA2235831D4B834800ABA979 /* RMarket.swift in Sources */,
 				DAE5888E1D50F38F00D2677B /* RListWants.swift in Sources */,
 				DAE5888D1D50F38F00D2677B /* RDataManager.swift in Sources */,
-				DA76E1681D4F48510060D181 /* ElemViewController.swift in Sources */,
 				DA76E1661D4F47F10060D181 /* ListViewController.swift in Sources */,
 				DA19080F1D52553C007D6480 /* WantlistTableViewCell.swift in Sources */,
 				DA1908131D5255EB007D6480 /* FloatRatingView.swift in Sources */,

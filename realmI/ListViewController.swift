@@ -5,7 +5,7 @@
 //  Created by FE Team TV on 8/1/16.
 //  Copyright © 2016 courses. All rights reserved.
 //
-
+//
 import UIKit
 import RealmSwift
 import SnapKit
@@ -23,6 +23,7 @@ class ListViewController: UIViewController {
        var lists : Results<RListWants>!
        var isEditingMode = false
        var currentCreateAction:UIAlertAction!
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -136,8 +137,14 @@ class ListViewController: UIViewController {
             let alertController = UIAlertController(title: title, message: "Write the name of your list.", preferredStyle: UIAlertControllerStyle.Alert)
       
             alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
-                textField.placeholder = "Title"
-                textField.enabled = false
+               
+                if updatedList != nil{
+                    textField.enabled = false
+                    textField.placeholder = "Title"
+                } else {
+                    textField.enabled = true
+                    textField.placeholder = "id"   }
+                
                 textField.addTarget(self, action: #selector(self.listNameFieldDidChange), forControlEvents: UIControlEvents.EditingChanged)
                 if updatedList != nil{
                     textField.text = updatedList.title
@@ -175,6 +182,7 @@ class ListViewController: UIViewController {
         
         if updatedList != nil {
             // update mode
+           
             try! uiRealm.write({ () -> Void in
                 updatedList.title = listName!
                 updatedList.rating = Int(rating) ?? 0
@@ -182,26 +190,34 @@ class ListViewController: UIViewController {
                 self.readTasksAndUpdateUI()
             })
         } else {
-            // add mode
             let updatedList = RListWants()
-            updatedList.title = listName!
-            updatedList.id = updatedList.IncrementaID()
+            // add mode
+           if updatedList.isPrimaryKey(Int(listName) ?? 0) {
+            updatedList.id =  Int(listName) ?? 0
+            //  updatedList.id = updatedList.IncrementaID()
             updatedList.rating = Int(rating) ?? 0
             updatedList.date_added = NSDate()
             updatedList.status = status.added.rawValue
-            try! uiRealm.write({ () -> Void in              
+            try! uiRealm.write({ () -> Void in
                 uiRealm.add(updatedList)
-                self.readTasksAndUpdateUI()
-            })
+                self.readTasksAndUpdateUI()  }) }
         }
     }
     
     func listNameFieldDidChange(textField:UITextField){
+      
         self.currentCreateAction.enabled = textField.text?.characters.count > 0
     }
     
+    /*func showModal() {
+        let modalViewController = ModalController()
+        modalViewController.modalPresentationStyle = .OverCurrentContext
+        presentViewController(modalViewController, animated: true, completion: nil)
+    }*/
+    
     func synchronization (sender: UIButton) {
         RDataManager.sharedManager.synRealtoDiscogs()
+        loadData(0)
     }
 
 }
@@ -209,6 +225,7 @@ class ListViewController: UIViewController {
 extension ListViewController: UITableViewDelegate {
     
 }
+
 
 extension ListViewController: UITableViewDataSource {
     
@@ -252,7 +269,6 @@ extension ListViewController: UITableViewDataSource {
             // Editing will go here
             let listToBeUpdated = self.lists[indexPath.row]
             self.displayAlertToAddTaskList(listToBeUpdated)
-            
         }
         
         return [deleteAction, editAction]
@@ -261,11 +277,11 @@ extension ListViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
-        let elemenContr = ElemViewController()
+      /*  let elemenContr = ElemViewController()
         
         elemenContr.selectedList =  self.lists[indexPath.row]
         
-        navigationController?.pushViewController(elemenContr, animated: true)
+        navigationController?.pushViewController(elemenContr, animated: true)*/
         
     }
     

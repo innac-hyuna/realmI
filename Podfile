@@ -10,6 +10,7 @@ target 'realmI' do
    pod 'ObjectMapper', '~> 1.3'
    pod 'AlamofireObjectMapper', '~> 3.0'
    pod 'SnapKit', '~> 0.15.0'
+   pod 'SwiftyJSON'
 
   target ‘realmITests' do
    
