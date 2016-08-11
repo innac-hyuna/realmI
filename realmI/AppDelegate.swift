@@ -9,7 +9,8 @@
 import UIKit
 import RealmSwift
 
-let uiRealm = try! Realm()
+
+var uiRealm: Realm!
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -19,6 +20,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
+        
+      /*  let conf = Realm.Configuration(schemaVersion: 1, migrationBlock: { (migration, oldSchemaVersion) in
+            
+        })
+        Realm.Configuration.defaultConfiguration = conf*/
+         uiRealm = try! Realm()
          print(uiRealm.configuration.fileURL)
         
         let mainController = UINavigationController(rootViewController: ListViewController())

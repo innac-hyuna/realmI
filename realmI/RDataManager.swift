@@ -42,9 +42,9 @@ class RDataManager {
         }
     }*/
    
-    func getData(urlStr: String, callback:((Bool)->())?) {
+    func getData(i: Int, callback:((Bool)->())?) {
         
-      Alamofire.request(.GET, urlStr).responseArray(keyPath: "wants") { (response: Response<[RListWants], NSError>) in
+      Alamofire.request(.GET, "https://api.discogs.com/users/innablack/wants?per_page=50&page=\(i)").responseArray(keyPath: "wants") { (response: Response<[RListWants], NSError>) in
                 switch response.result {
                 case .Success(let wants):
                     do {
@@ -64,8 +64,8 @@ class RDataManager {
                     
                     callback?(true)
            }
-     }
-}
+        }
+    }
     
     func delData(urlStr: String, idRow: Int) {
         Alamofire.request(.DELETE, urlStr)
@@ -90,7 +90,6 @@ class RDataManager {
         }
     }
     
-    
     func updateDataPut(urlStr: String, parameters: NSDictionary, idRow: Int) {
         
         Alamofire.request(.PUT, urlStr, parameters: parameters as? [String : AnyObject],  encoding: .JSON)
@@ -106,7 +105,7 @@ class RDataManager {
     func synRealtoDiscogs() {
         
         let lists = uiRealm.objects(RListWants)     
-        var index = lists.count-1
+        var index = lists.count - 1
         while index >= 0 {
             let el = lists[index]
             switch  el.status {

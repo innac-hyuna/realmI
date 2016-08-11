@@ -9,6 +9,7 @@
 import UIKit
 import RealmSwift
 import SnapKit
+import ReactiveCocoa
 
 enum status: Int {
     case non = 0
@@ -23,11 +24,18 @@ class ListViewController: UIViewController {
        var lists : Results<RListWants>!
        var isEditingMode = false
        var currentCreateAction:UIAlertAction!
+       var textF: UITextField!
+       var firstSignal: RACSignal!
+       var secondSignal: RACSignal!
+       var thirdSignal: RACSignal!
     
-
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.bgColor()
+        
+        textF = UITextField()
+        view.addSubview(textF)
+        
         tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
@@ -65,31 +73,34 @@ class ListViewController: UIViewController {
         
         self.navigationItem.setLeftBarButtonItem(addButton, animated: true)
         
+  
+        
         segmSort.snp_makeConstraints { (make) in
             make.top.equalTo(snp_topLayoutGuideBottom)
             make.width.equalTo(view)
             make.height.equalTo(44)
         }
         
-        tableView.snp_makeConstraints { (make) in
+        textF.snp_makeConstraints { (make) in
             make.top.equalTo(segmSort.snp_bottom).offset(10)
+            make.width.equalTo(view)
+            make.height.equalTo(44)
+        }
+        
+        tableView.snp_makeConstraints { (make) in
+            make.top.equalTo(textF.snp_bottom).offset(10)
             make.width.equalTo(view)
             make.bottom.equalTo(view).offset(0)
         }
-       
+        
+        let searchStrings: RACSignal = textF.rac_textSignal()
+        searchStrings.subscribeNext { text in
+            print(text)
+        }
+
         loadData(0)
     }
     
-    func loadData(i: Int) -> Bool {
-
-        RDataManager.sharedManager.getData("https://api.discogs.com/users/innablack/wants?per_page=50&page=\(i)") { [unowned self] (eprocess) in
-            print("https://api.discogs.com/users/innablack/wants?per_page=50&page=\(i)")
-            if eprocess {
-                self.readTasksAndUpdateUI()
-            }
-        }
-      return true
-    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -97,6 +108,18 @@ class ListViewController: UIViewController {
     
     override func viewWillAppear(animated: Bool) {
         
+    }
+    
+    func loadData(i: Int) -> Bool {
+        
+        RDataManager.sharedManager.getData(i) { [unowned self] (eprocess) in
+            //print()
+            if eprocess {
+                self.readTasksAndUpdateUI()
+            }
+        }
+        
+        return true
     }
     
     func didSelectSortCriteria(sender: UISegmentedControl) {
@@ -111,7 +134,6 @@ class ListViewController: UIViewController {
         default:
             break
         }
-       
         self.tableView.reloadData()
     }
     
@@ -135,17 +157,35 @@ class ListViewController: UIViewController {
             }
         
             let alertController = UIAlertController(title: title, message: "Write the name of your list.", preferredStyle: UIAlertControllerStyle.Alert)
+        
+        //CREATE
+        let createAction = UIAlertAction(title: doneTitle, style: UIAlertActionStyle.Default) { alert -> Void in
+            
+            let name = alertController.textFields?[0].text
+            let rating = alertController.textFields?[1].text
+            self.addToRealm(updatedList, listName: name, rating: rating)
+            
+        }
+        alertController.addAction(createAction)
+        createAction.enabled = false
+        self.currentCreateAction = createAction
       
             alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
                
-                if updatedList != nil{
+                if updatedList != nil {
                     textField.enabled = false
                     textField.placeholder = "Title"
                 } else {
                     textField.enabled = true
                     textField.placeholder = "id"   }
                 
-                textField.addTarget(self, action: #selector(self.listNameFieldDidChange), forControlEvents: UIControlEvents.EditingChanged)
+                // create first signal
+                self.firstSignal = textField.rac_textSignal().map({ (text) -> AnyObject! in
+                    if (text as! String) != "" {
+                        return true }
+                    return false
+                })
+                
                 if updatedList != nil{
                     textField.text = updatedList.title
                 }
@@ -153,30 +193,49 @@ class ListViewController: UIViewController {
         
             alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
                 textField.placeholder = "Rating"
-                textField.addTarget(self, action: #selector(self.listNameFieldDidChange), forControlEvents: UIControlEvents.EditingChanged)
-                if updatedList != nil{
-                    textField.text = String(updatedList.rating)
-                }
+                
+               // create second signal
+                self.secondSignal = textField.rac_textSignal().map({ (text) -> AnyObject! in
+                    let textInt = Int(text as! String) ?? 0
+                    if textInt > 5   {
+                        return  false
+                    } else {
+                        return  true }
+                })
+                
+                
+                self.thirdSignal =  self.secondSignal
+                
+                //create third signal with color
+                self.thirdSignal.map({ (tBool) -> AnyObject! in
+                    if tBool as! NSNumber == 0   {
+                        return  UIColor.redColor()
+                    } else {
+                        return  UIColor.blackColor() }
+                })   // get signal use color
+                    .subscribeNext({ (color) -> Void in
+                    textField.layer.borderWidth = 1
+                    textField.layer.borderColor = (color as! UIColor).CGColor
+               })
+                
             }
-        
-        //CREATE
-       let createAction = UIAlertAction(title: doneTitle, style: UIAlertActionStyle.Default) { alert -> Void in
-            
-            let name = alertController.textFields?[0].text
-            let rating = alertController.textFields?[1].text
-            self.addToRealm(updatedList, listName: name, rating: rating)
-            
-        }
-           alertController.addAction(createAction)
-           createAction.enabled = false
-           self.currentCreateAction = createAction
+            // combination two signals
+        RACSignal.combineLatest([firstSignal, thirdSignal])
+            .subscribeNext({ (action) -> Void in // get signal and set enabled button
+              let tup = action as! RACTuple
+                let firstT = tup.first as! Bool
+                let secondT = tup.second as! Bool
+                self.currentCreateAction.enabled = (firstT && secondT ) ? true : false
+            })
         
         //CANCEL
-        alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
+        alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))      
+ 
         
           // alertController.view.setNeedsLayout()
            presentViewController(alertController, animated: true, completion: nil)
     }
+    
     
     func addToRealm (updatedList: RListWants!, listName: String!, rating: String!) {
         
@@ -189,6 +248,7 @@ class ListViewController: UIViewController {
                 updatedList.status = status.updated.rawValue
                 self.readTasksAndUpdateUI()
             })
+            
         } else {
             let updatedList = RListWants()
             // add mode
@@ -204,16 +264,6 @@ class ListViewController: UIViewController {
         }
     }
     
-    func listNameFieldDidChange(textField:UITextField){
-      
-        self.currentCreateAction.enabled = textField.text?.characters.count > 0
-    }
-    
-    /*func showModal() {
-        let modalViewController = ModalController()
-        modalViewController.modalPresentationStyle = .OverCurrentContext
-        presentViewController(modalViewController, animated: true, completion: nil)
-    }*/
     
     func synchronization (sender: UIButton) {
         RDataManager.sharedManager.synRealtoDiscogs()

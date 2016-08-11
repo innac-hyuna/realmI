@@ -1,4 +1,5 @@
 # Uncomment this line to define a global platform for your project
+
 platform :ios, '8.0'
 
 target 'realmI' do
@@ -11,7 +12,8 @@ target 'realmI' do
    pod 'AlamofireObjectMapper', '~> 3.0'
    pod 'SnapKit', '~> 0.15.0'
    pod 'SwiftyJSON'
-
+   pod 'ReactiveCocoa', '= 4.0.0'
+   
   target ‘realmITests' do
    
     # Pods for testing
