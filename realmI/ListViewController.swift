@@ -110,16 +110,15 @@ class ListViewController: UIViewController {
         
     }
     
-    func loadData(i: Int) -> Bool {
-        
-        RDataManager.sharedManager.getData(i) { [unowned self] (eprocess) in
-            //print()
-            if eprocess {
+    func loadData(i: Int) {
+       
+        let sigProd: SignalProducer = RDataManager.sharedManager.cretaeSignalProducer(i)
+       
+        sigProd.startWithNext { (eprocess) in
+            if eprocess as! Bool {
                 self.readTasksAndUpdateUI()
             }
-        }
-        
-        return true
+        }    
     }
     
     func didSelectSortCriteria(sender: UISegmentedControl) {
@@ -201,8 +200,7 @@ class ListViewController: UIViewController {
                         return  false
                     } else {
                         return  true }
-                })
-                
+                })                
                 
                 self.thirdSignal =  self.secondSignal
                 
