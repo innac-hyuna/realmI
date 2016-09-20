@@ -13,7 +13,7 @@ target 'realmI' do
    pod 'SnapKit', '~> 0.15.0'
    pod 'SwiftyJSON'
    pod 'ReactiveCocoa', '= 4.0.0'
-   pod 'Stellar', :git => 'https://github.com/AugustRush/Stellar.git'
+
    
   target ‘realmITests' do
    
