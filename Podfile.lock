@@ -22,6 +22,7 @@ PODS:
     - Realm (= 1.0.2)
   - Result (1.0.2)
   - SnapKit (0.15.0)
+  - Stellar (0.61)
   - SwiftyJSON (2.3.2)
 
 DEPENDENCIES:
@@ -30,7 +31,17 @@ DEPENDENCIES:
   - ReactiveCocoa (= 4.0.0)
   - RealmSwift
   - SnapKit (~> 0.15.0)
+  - Stellar (from `https://github.com/AugustRush/Stellar.git`)
   - SwiftyJSON
+
+EXTERNAL SOURCES:
+  Stellar:
+    :git: https://github.com/AugustRush/Stellar.git
+
+CHECKOUT OPTIONS:
+  Stellar:
+    :commit: 41e2f0685b9cd66bc5bde020ec4a2b852f86030b
+    :git: https://github.com/AugustRush/Stellar.git
 
 SPEC CHECKSUMS:
   Alamofire: 01a82e2f6c0f860ade35534c8dd88be61bdef40c
@@ -41,8 +52,9 @@ SPEC CHECKSUMS:
   RealmSwift: 82f3ac5e24530143dddfde2033acc0d308f27d96
   Result: dd3dd71af3fa2e262f1a999e14fba2c25ec14f16
   SnapKit: 4962eed2ee18e48cbd2b2292fffc57efe7235f87
+  Stellar: d74c4e9b73b75dc7a76efc1de7e9dfc60a4b3da0
   SwiftyJSON: 04ccea08915aa0109039157c7974cf0298da292a
 
-PODFILE CHECKSUM: b180f4dceb23fe72e9ec59eb29091504f70fa64b
+PODFILE CHECKSUM: 7f6d8d258900fdb6174421036f42a7c9f8b66fc4
 
-COCOAPODS: 1.1.0.beta.1
+COCOAPODS: 1.0.1

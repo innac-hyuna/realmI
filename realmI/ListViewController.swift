@@ -122,14 +122,14 @@ class ListViewController: UIViewController {
     }
     
     func didSelectSortCriteria(sender: UISegmentedControl) {
-        
+       
         switch sender.selectedSegmentIndex {
         case 0:
-            self.lists = self.lists.sorted("title")
+            self.lists = self.lists?.sorted("title")
         case 1:
-            self.lists = self.lists.sorted("year")
+            self.lists = self.lists?.sorted("year")
         case 2:
-            self.lists = self.lists.sorted("rating")
+            self.lists = self.lists?.sorted("rating")
         default:
             break
         }
